@@ -22,7 +22,7 @@ namespace Core.Specification
         public string Search
         { 
             get =>_search;
-            set=>value.ToLower();
+            set=> _search=value.ToLower();
          }
     }
 }
