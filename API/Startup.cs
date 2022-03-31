@@ -5,6 +5,7 @@ using API.Helpers;
 using API.Middleware;
 using Core.Intefaces;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -31,13 +32,16 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();            
+            services.AddControllers();    
+                   
             services.AddDbContext<StoreContext>(x=>x.UseSqlServer(_config.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<AppIdentityDbContext>(x=>x.UseSqlServer(_config.GetConnectionString("IdentityConnection"))); 
             services.AddSingleton<IConnectionMultiplexer>(c=>{
                 var configuration=ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),true);
                 return ConnectionMultiplexer.Connect(configuration);
             });
             services.AddApplicationServices();
+            services.AddIdentityServices(_config);
             services.AddSwaggerDocumentation();
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddCors(opt=>
@@ -56,12 +60,13 @@ namespace API
             app.UseMiddleware<ExceptionMiddleware>();
            
             
-            app.UseStatusCodePagesWithReExecute("errors/{0}");
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
             app.UseHttpsRedirection();
 
             app.UseRouting();
             app.UseStaticFiles();
             app.UseCors("CorsPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseSwaggerDocumentation();
             app.UseEndpoints(endpoints =>
