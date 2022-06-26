@@ -23,7 +23,7 @@ export class Basket implements IBasket{
 
 export interface IBasketTotals{
     shipping:number;
-    subTotal:number;
+    subtotal:number;
     total:number;
 }
 
